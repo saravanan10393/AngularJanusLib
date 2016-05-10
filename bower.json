@@ -1,0 +1,17 @@
+{
+  "name": "AngularJanusLib",
+  "homepage": "https://github.com/saravanan10393/AngularJanusLib",
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "angularjs#^1.5.5"
+  }
+}
