@@ -7,13 +7,14 @@
         videoHandler = null,
         roomId,
         myid;
-
+    
+    Janus.videoHelper = VideoHelper;
+    
     function VideoHelper(roomId, element) {
-        this.roomId = roomId;
-        this.started = started;
+        roomId = roomId;
 
     }
-
+    VideoHelper.prototype.started = false;
     VideoHelper.prototype.init = function call(serverUrl) {
         var deferd = $.Deferred();
         serverUrl = serverUrl;
@@ -31,6 +32,8 @@
         janus = new Janus({
             server: serverUrl,
             success: function () {
+                //mark the session is started
+                VideoHelper.prototype.started = true;
                 attchPublisher();
             },
             error: function (cause) {
@@ -44,9 +47,9 @@
         });
     };
 
-    VideoHelper.prototype.call = function call(username, callback,roomId) {
+    VideoHelper.prototype.call = function call(username, callback,rid) {
         userName = username;
-        roomId = roomId;
+        roomId = rid || roomId;
         if (janus) {
             var register = { "request": "join", "room": roomId, "ptype": "publisher", "display": userName };
             videoHandler.send({ "message": register });
@@ -218,34 +221,34 @@
                     Janus.debug(" ::: Got a local stream :::");
                     Janus.debug(JSON.stringify(stream));
                     
-                    if ($('#videoElement').length === 0) {
-                        $('#videoElement').append('<video class="localvideo" id="myvideo" width="100%" height="100%" autoplay muted="muted"/>');
+                    if ($('#localvideo').length === 0) {
+                        $('#localvideo').append('<video class="localvideo" id="myvideo" width="100%" height="100%" autoplay muted="muted"/>');
                         // Add a 'mute' button
-                        $('#videoElement').append('<button class="btn btn-warning btn-xs" id="mute" style="position: absolute; bottom: 0px; left: 0px; margin: 15px;">Mute</button>');
-                        $('#mute').click(toggleMute);
+                        //$('#videoElement').append('<button class="btn btn-warning btn-xs" id="mute" style="position: absolute; bottom: 0px; left: 0px; margin: 15px;">Mute</button>');
+                        //$('#mute').click(toggleMute);
                         // Add an 'unpublish' button
-                        $('#videoElement').append('<button class="btn btn-warning btn-xs" id="unpublish" style="position: absolute; bottom: 0px; right: 0px; margin: 15px;">Unpublish</button>');
-                        $('#unpublish').click(unpublishOwnFeed);
+                        //$('#videoElement').append('<button class="btn btn-warning btn-xs" id="unpublish" style="position: absolute; bottom: 0px; right: 0px; margin: 15px;">Unpublish</button>');
+                        //$('#unpublish').click(unpublishOwnFeed);
                     }                  
                     
                     attachMediaStream($('#myvideo').get(0), stream);
                     
                     $("#myvideo").get(0).muted = "muted";
                     
-                    $("#videolocal").parent().parent().block({
-                        message: '<b>Publishing...</b>',
-                        css: {
-                            border: 'none',
-                            backgroundColor: 'transparent',
-                            color: 'white'
-                        }
-                    });
+                    // $("#videolocal").parent().parent().block({
+                    //     message: '<b>Publishing...</b>',
+                    //     css: {
+                    //         border: 'none',
+                    //         backgroundColor: 'transparent',
+                    //         color: 'white'
+                    //     }
+                    // });
                     
                     var videoTracks = stream.getVideoTracks();
                     if (videoTracks === null || videoTracks === undefined || videoTracks.length === 0) {
                         // No webcam
                         $('#myvideo').hide();
-                        $('#videoElement').append(
+                        $('#localvideo').append(
                             '<div class="no-video-container localvideo">' +
                             '<i class="fa fa-video-camera fa-5 no-video-icon" style="height: 100%;"></i>' +
                             '<span class="no-video-text" style="font-size: 16px;">No webcam available</span>' +
@@ -258,9 +261,9 @@
                 oncleanup: function () {
                     Janus.log(" ::: Got a cleanup notification: we are unpublished now :::");
                     mystream = null;
-                    $('#videolocal').html('<button id="publish" class="btn btn-primary">Publish</button>');
+                    $('#localvideo').html('<button id="publish" class="btn btn-primary">Publish</button>');
                     $('#publish').click(function () { publishOwnFeed(true); });
-                    $("#videolocal").parent().parent().unblock();
+                   // $("#videolocal").parent().parent().unblock();
                 }
             });
     };
@@ -285,7 +288,7 @@
                         $('#publish').removeAttr('disabled').click(function () { publishOwnFeed(true); });
                     }
                 }
-            });
+            });ss
     };
 
     function newRemoteFeed(id, display) {
@@ -331,7 +334,7 @@
                                 remoteFeed.spinner.spin();
                             }
                             Janus.log("Successfully attached to feed " + remoteFeed.rfid + " (" + remoteFeed.rfdisplay + ") in room " + msg["room"]);
-                            $('#remote' + remoteFeed.rfindex).removeClass('hide').html(remoteFeed.rfdisplay).show();
+                           // $('#remote' + remoteFeed.rfindex).removeClass('hide').html(remoteFeed.rfdisplay).show();
                         } else if (msg["error"] !== undefined && msg["error"] !== null) {
                             bootbox.alert(msg["error"]);
                         } else {
@@ -349,7 +352,7 @@
                                 success: function (jsep) {
                                     Janus.debug("Got SDP!");
                                     Janus.debug(jsep);
-                                    var body = { "request": "start", "room": 1234 };
+                                    var body = { "request": "start", "room": roomId };
                                     remoteFeed.send({ "message": body, "jsep": jsep });
                                 },
                                 error: function (error) {
