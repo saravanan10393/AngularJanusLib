@@ -1,12 +1,44 @@
 <html>
     <head>
+        <link rel="stylesheet" href="../bower_components/Materialize/dist/css/materialize.css">
+         <link rel="stylesheet" href="./app/css/style.css">
         <script src="../bower_components/jquery/dist/jquery.min.js"></script>
+        <script src="../bower_components/Materialize/dist/js/materialize.js"></script>
         <script src="../bower_components/angular/angular.min.js"></script>
         <script src="./libs/janus.js"></script>
-        <script src="./libs/janus.nojquery.js"></script>
+        
     </head>
-    <body ng-app="janus">
-         
+    <body ng-app="janus" class="container">
+        <div class="row video-holder">
+            <div class="col m6 s6 l6 video">
+                <div class="header">
+                    <span>asdfasd</span>
+                </div>
+            </div>
+            <div class="col m6 s6 l6 video">
+                <div class="header">
+                    <span>asdfa</span>
+                </div>
+            </div>
+            <div class="col m6 s6 l6 video">
+                <div class="header">
+                    <span>asdfasd</span>
+                </div>
+            </div>
+            <div class="col m6 s6 l6 video">
+                <div class="header">
+                    <span>asdfad</span>
+                </div>
+            </div>
+            <div class="localvideo">
+                
+            </div>
+        </div>
+        <div class="row controls">
+            <button>MuteAudio</button>
+            <button>MuteVideo</button>
+        </div> 
+               
         <script src="./app/app.js"></script>
         <script src="./app/controller/janusCtrl.js"></script>
         <script src="./app/service/videoCallService.js"></script>
