@@ -12,6 +12,7 @@
     "tests"
   ],
   "dependencies": {
-    "angular": "angularjs#^1.5.5"
+    "angular": "angularjs#^1.5.5",
+    "jquery": "^2.2.3"
   }
 }
