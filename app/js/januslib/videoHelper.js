@@ -6,71 +6,77 @@
         started = false,
         videoHandler = null,
         roomId,
-        myid;
+        myid,
+        videoContainer = null;
     
     Janus.videoHelper = VideoHelper;
     
-    function VideoHelper(roomId, element) {
-        roomId = roomId;
-
+    function VideoHelper(serverUrl, elementId) {
+        this.init(serverUrl);
+        videoContainer = $(elementId);
     }
+    
+    //attach eventEmitter for custom events
+    $.extend(VideoHelper.prototype,$.eventEmitter);
+    
     VideoHelper.prototype.started = false;
     VideoHelper.prototype.init = function call(serverUrl) {
-        var deferd = $.Deferred();
-        serverUrl = serverUrl;
+        var self = this;
         Janus.init({
             debug: "all", callback: function cb() {
-                VideoHelper.prototype.createSession();
-                deferd.resolve('Initialized');
+                self.createSession();
             }
-        });
-        return deferd.promise(call);
+        });  
     };
 
     VideoHelper.prototype.createSession = function createSession() {
+        var self = this;
         //create janus session
         janus = new Janus({
             server: serverUrl,
             success: function () {
                 //mark the session is started
-                VideoHelper.prototype.started = true;
-                attchPublisher();
+                self.started = true;
+                attchPublisher(self);
             },
             error: function (cause) {
                 Janus.error(error);
                 janus = null;
             },
             destroyed: function () {
-                window.location.reload();
+                self.emit('destroyed');
                 janus = null;
             }
         });
     };
 
-    VideoHelper.prototype.call = function call(username, callback,rid) {
+    VideoHelper.prototype.call = function call(rid,username, callback) {
         userName = username;
         roomId = rid || roomId;
-        if (janus) {
+        if (janus && videoHandler) {
             var register = { "request": "join", "room": roomId, "ptype": "publisher", "display": userName };
             videoHandler.send({ "message": register });
+            callback(true);
+            this.isBusy = true;
         } else {
-            callback("No Session");
+            callback(false);
         }
     };
 
     VideoHelper.prototype.cut = function cut() {
         //try with destroy if whole call got cut go for sending message to gateway
         janus.destroy();
-        VideoHelper.prototype.createSession();
+        this.createSession();
     };
 
-    VideoHelper.prototype.toggleMuteAudio = function toggleMuteAudio() {
+    VideoHelper.prototype.toggleMuteAudio = function toggleMuteAudio(callback) {
         var muted = videoHandler.isAudioMuted();
         Janus.log((muted ? "Unmuting" : "Muting") + " local audio stream...");
         if (muted)
             videoHandler.unmuteAudio();
         else
             videoHandler.muteAudio();
+        callback(videoHandler.isAudioMuted()) //return true / false for muted/unmuted
     };
 
     VideoHelper.prototype.toggleMuteVideo = function toggleMuteVideo() {
@@ -80,11 +86,11 @@
             videoHandler.unmuteVideo();
         else
             videoHandler.muteVideo();
-        
+        callback(videoHandler.isVideoMuted()) //return true / false for muted/unmuted
     };
 
-    //private method
-    function attchPublisher() {
+    //private method to get video handler
+    function attchPublisher(self) {
         janus.attach(
             {
                 plugin: "janus.plugin.videoroom",
@@ -180,6 +186,10 @@
                                     Janus.debug("Feed " + remoteFeed.rfid + " (" + remoteFeed.rfdisplay + ") has left the room, detaching");
                                     $('#remote' + remoteFeed.rfindex).empty().hide();
                                     $('#videoremote' + remoteFeed.rfindex).empty();
+                                    
+                                    //emit remote persion left event
+                                    self.emit('onLeaveRoom',remoteFeed.rfdisplay);
+                                    
                                     feeds[remoteFeed.rfindex] = null;
                                     remoteFeed.detach();
                                 }
@@ -190,6 +200,10 @@
                                 if (unpublished === 'ok') {
                                     // That's us
                                     videoHandler.hangup();
+                                    
+                                    // doubt whether it is cut or waitingvideo
+                                    self.emit('onCut');
+                                    
                                     return;
                                 }
                                 var remoteFeed = null;
@@ -201,6 +215,10 @@
                                 }
                                 if (remoteFeed != null) {
                                     Janus.debug("Feed " + remoteFeed.rfid + " (" + remoteFeed.rfdisplay + ") has left the room, detaching");
+                                    
+                                    //emit remote persion left event
+                                    self.emit('onLeaveRoom',remoteFeed.rfdisplay);
+                                    
                                     $('#remote' + remoteFeed.rfindex).empty().hide();
                                     $('#videoremote' + remoteFeed.rfindex).empty();
                                     feeds[remoteFeed.rfindex] = null;
@@ -231,6 +249,9 @@
                         //$('#unpublish').click(unpublishOwnFeed);
                     }                  
                     
+                    //on local stream
+                    self.emit('onLocalStream',stream);
+                    
                     attachMediaStream($('#myvideo').get(0), stream);
                     
                     $("#myvideo").get(0).muted = "muted";
@@ -246,6 +267,8 @@
                     
                     var videoTracks = stream.getVideoTracks();
                     if (videoTracks === null || videoTracks === undefined || videoTracks.length === 0) {
+                        //off event
+                        self.off('noLocalStream');
                         // No webcam
                         $('#myvideo').hide();
                         $('#localvideo').append(
@@ -259,6 +282,7 @@
                     // The publisher stream is sendonly, we don't expect anything here
                 },
                 oncleanup: function () {
+                    //to do
                     Janus.log(" ::: Got a cleanup notification: we are unpublished now :::");
                     mystream = null;
                     $('#localvideo').html('<button id="publish" class="btn btn-primary">Publish</button>');
@@ -284,11 +308,12 @@
                     if (useAudio) {
                         publishOwnFeed(false);
                     } else {
+                        //todo
                         bootbox.alert("WebRTC error... " + JSON.stringify(error));
                         $('#publish').removeAttr('disabled').click(function () { publishOwnFeed(true); });
                     }
                 }
-            });ss
+            });
     };
 
     function newRemoteFeed(id, display) {
