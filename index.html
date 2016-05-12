@@ -10,7 +10,7 @@
         <script src="./libs/janus.js"></script>
         
     </head>
-    <body ng-app="janus" class="container">
+    <body ng-app="janus" ng-controller="videoCallCtrl" class="container">
         <div id="video-container" class="row video-holder">
             <div id="videoremote1" class="col m6 s6 l6 video">
                 <div class="header">
@@ -42,7 +42,7 @@
         </div> 
                
         <script src="./app/app.js"></script>
-        <script src="./app/controller/janusCtrl.js"></script>
-        <script src="./app/service/videoCallService.js"></script>
+        <script src="./app/js/controller/janusCtrl.js"></script>
+        <script src="./app/js/service/videoFactory.js"></script>
     </body>
 </html>
