@@ -9,9 +9,10 @@
         myid,
         videoContainer = null;
     
-    Janus.videoHelper = VideoHelper;
+    Janus.VideoHelper = VideoHelper;
     
-    function VideoHelper(serverUrl, elementId) {
+    function VideoHelper(url, elementId) {
+        serverUrl = url;
         this.init(serverUrl);
         videoContainer = $(elementId);
     }
@@ -20,10 +21,11 @@
     $.extend(VideoHelper.prototype,$.eventEmitter);
     
     VideoHelper.prototype.started = false;
-    VideoHelper.prototype.init = function call(serverUrl) {
+    VideoHelper.prototype.init = function call() {
         var self = this;
         Janus.init({
             debug: "all", callback: function cb() {
+                console.log('inilized and calling session');
                 self.createSession();
             }
         });  
@@ -40,7 +42,7 @@
                 attchPublisher(self);
             },
             error: function (cause) {
-                Janus.error(error);
+                Janus.error(cause);
                 janus = null;
             },
             destroyed: function () {

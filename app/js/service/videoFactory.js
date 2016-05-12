@@ -5,14 +5,13 @@
         .module('janus')
         .factory('VideoCall', VideoCall);
 
-    VideoCall.$inject = ['$http', 'Constants', '$q'];
-    function VideoCall($http, Constants, $q) {
+    VideoCall.$inject = ['$http', '$q'];
+    function VideoCall($http,  $q) {
         //initialize the janus
-        var videoCaller = new Janus.VideoHelper('https://janus.conf.meetecho.com:8088/janus','#video-container');
+        var videoCaller = new Janus.VideoHelper('http://janus.conf.meetecho.com:8088/janus','#video-container');
         var roomId = 12345;      
         var service = {
             isBusy: false,
-            destroy: destroy,
             call: call,
             pickCall: pickCall,
             addToCall: addToCall,

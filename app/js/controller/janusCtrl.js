@@ -11,8 +11,8 @@
         vm.currentUser = null;
         
         vm.call = function(to){
-            VideoCall.call(currentUser.name);
-            socket.emit('call:outgoing',roomId);
+            VideoCall.call("saravanan");
+           // socket.emit('call:outgoing',roomId);
         };
         
         vm.cut = function(){
@@ -31,13 +31,13 @@
             });
         };
         
-        socket.on('call:incomming',function(roomId){
-           if(VideoCall.isBusy){
-               socket.emit('user:busy',"userBusy");
-               return;
-           }
-           console.log('call is comming and auto attending call to roomId ',roomId);
-           VideoCall.pickCall(roomId);
-        });
+        // socket.on('call:incomming',function(roomId){
+        //    if(VideoCall.isBusy){
+        //        socket.emit('user:busy',"userBusy");
+        //        return;
+        //    }
+        //    console.log('call is comming and auto attending call to roomId ',roomId);
+        //    VideoCall.pickCall(roomId);
+        // });
     }
 })();

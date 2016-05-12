@@ -5,12 +5,18 @@
         <script src="../bower_components/jquery/dist/jquery.min.js"></script>
         <script src="./libs/spinner.js"></script>
         <script src="./libs/bootbox.min.js"></script>
+        
+        
+        <script src="./libs/janus.js"></script>
+        <script src="./app/js/januslib/eventEmitter.js"></script>
+        <script src="./app/js/januslib/videoHelper.js"></script>
+        
+        
         <script src="../bower_components/Materialize/dist/js/materialize.js"></script>
         <script src="../bower_components/angular/angular.min.js"></script>
-        <script src="./libs/janus.js"></script>
         
     </head>
-    <body ng-app="janus" ng-controller="videoCallCtrl" class="container">
+    <body ng-app="janus" ng-controller="videoCallCtrl as ctrl" class="container">
         <div id="video-container" class="row video-holder">
             <div id="videoremote1" class="col m6 s6 l6 video">
                 <div class="header">
@@ -37,10 +43,11 @@
             </div>
         </div>
         <div class="row controls">
-            <button>MuteAudio</button>
-            <button>MuteVideo</button>
+            <button ng-click="ctrl.toggleAudio()">MuteAudio</button>
+            <button ng-click="ctrl.toggleVideo()">MuteVideo</button>
+            <button ng-click="ctrl.call()">call</button>
         </div> 
-               
+             
         <script src="./app/app.js"></script>
         <script src="./app/js/controller/janusCtrl.js"></script>
         <script src="./app/js/service/videoFactory.js"></script>
